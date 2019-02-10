@@ -4,6 +4,7 @@ import Server.Controller.Command.Command;
 
 import java.io.*;
 import java.net.Socket;
+import java.net.SocketException;
 
 public class TerminalController implements Runnable{
     /**
@@ -34,7 +35,14 @@ public class TerminalController implements Runnable{
             ObjectInput request = new ObjectInputStream(client.getInputStream())){
 
             while(!client.isClosed()){
-                String data = request.readUTF();
+                String data;
+                try{
+                    data = request.readUTF();
+                }
+                catch (SocketException se){
+                    data = "exit";
+                }
+
                 if(!data.equals("exit")){
 
                     try{
@@ -51,9 +59,10 @@ public class TerminalController implements Runnable{
                         response.writeUTF(e.getMessage());
                         response.flush();
                     }
-
                 }
                 else{
+                    response.close();
+                    request.close();
                     client.close();
                     System.out.println("Client disconnected");
                 }

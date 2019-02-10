@@ -25,4 +25,14 @@ public class Interpreter {
     public String getCommandName(ObjectInput response) throws IOException{
         return response.readUTF();
     }
+
+    /**
+     * This method returns cause of error
+     * @param response of server
+     * @return data of error
+     * @throws IOException
+     */
+    public String getError(ObjectInput response) throws IOException{
+        return response.readUTF();
+    }
 }

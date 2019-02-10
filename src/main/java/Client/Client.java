@@ -7,6 +7,7 @@ import CommonPacage.View.PrintMainMenu;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.Scanner;
 
 /**
@@ -53,7 +54,7 @@ public class Client {
             ObjectInput response = config.createOIS(socket)){
 
             menu.printMenu();
-            while(!socket.isOutputShutdown()){
+            while(!socket.isClosed()){
                 String data = in.nextLine();
 
                 if(data.equals("exit")) {
@@ -62,6 +63,7 @@ public class Client {
                     Thread.sleep(1000);
                     socket.shutdownInput();
                     socket.shutdownOutput();
+                    socket.close();
                 }
                 else if(data.equals("help")){
                     menu.printCustomerCommandList();
@@ -72,6 +74,9 @@ public class Client {
                     tc.start(response);
                 }
             }
+        }
+        catch (SocketException se){
+            System.out.println("Server is closed");
         }
         catch (Exception e){
             e.printStackTrace();

@@ -65,7 +65,7 @@ public class CreateCustomer implements Command {
     /**
      * This method check exist customer in DB or not
      * @param id of customer
-     * @return true - if customer already exist; false - if not
+     * @return true - if customer is not exist; false - if is already exist
      * @see CustomerDB#getCustomer(int)
      */
     private boolean checkExistCustomerByID(int id){

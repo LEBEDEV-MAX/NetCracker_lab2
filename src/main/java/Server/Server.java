@@ -1,11 +1,10 @@
 package Server;
 
 import Server.Controller.Configuration;
-import Server.Controller.TerminalController;
 import Server.Model.CustomerDB;
 
 import java.net.ServerSocket;
-import java.net.Socket;
+import java.util.Scanner;
 
 /**
  * Server class
@@ -30,22 +29,34 @@ public class Server {
     }
 
     /**
-     * This method create ServerSocket
-     * accept new client and call Terminal for handles client's request in new Thread
+     * This method create ServerSocket,
+     * create new ClientHandler and sends it to new Thread,
+     * waiting for 'exit' command to close the server
      */
     public void start(){
         try(ServerSocket serverSocket = new ServerSocket(SERVER_PORT, MAX_CLIENT)){
             System.out.println("Server is running");
+            /**
+             * @see ClientHandler
+             */
+            ClientHandler clientHandler = new ClientHandler(serverSocket, config, db);
+            Thread newThread = new Thread(clientHandler);
+            newThread.start();
+
+            System.out.println("Write 'exit' to close the server");
+            Scanner in = config.createScanner();
             while (!serverSocket.isClosed()){
-                System.out.println("Waiting for connection...");
-                Socket client = serverSocket.accept();
-                System.out.println("Client connected...");
-                /**
-                 * @see TerminalController
-                 */
-                TerminalController tc = config.createTerminal(client, db);
-                Thread newThread = new Thread(tc);
-                newThread.start();
+                String data = in.nextLine();
+                if(data.equals("exit")){
+                    /**
+                     * @see ClientHandler#closeClients() 
+                     */
+                    clientHandler.closeClients();
+                    serverSocket.close();
+                }
+                else{
+                    System.out.println("Wrong command");
+                }
             }
         }
         catch (Exception e){

@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
 
 /**
  * This class create other classes of the program
@@ -59,5 +60,13 @@ public class Configuration {
     @NotNull
     public CustomerDB createDB(){
         return new CustomerDB();
+    }
+
+    /**
+     * Create Scanner
+     * @return Scanner
+     */
+    public Scanner createScanner(){
+        return new Scanner(System.in);
     }
 }

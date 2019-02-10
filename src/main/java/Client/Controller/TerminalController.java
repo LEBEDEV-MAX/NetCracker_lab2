@@ -67,7 +67,7 @@ public class TerminalController {
      * @throws IOException
      */
     private void fail(ObjectInput response) throws IOException{
-        String error = response.readUTF();
+        String error = interpreter.getError(response);
         printE.print(error);
     }
 }
