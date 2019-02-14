@@ -1,6 +1,7 @@
 package Server.Model;
 
 import CommonPacage.Controller.Exceptions.CustomerNotFoundException;
+import CommonPacage.Controller.Exceptions.ExistCustomerException;
 import CommonPacage.Model.Customer;
 
 import java.util.ArrayList;
@@ -41,9 +42,12 @@ public class CustomerDB {
     /**
      * Add new customer in DB
      * @param customer new customer
+     * @throws ExistCustomerException
+     * @see ExistCustomerException
      */
-    public void addCustomer(Customer customer){
-        customers.add(customer);
+    public synchronized void addCustomer(Customer customer) throws ExistCustomerException{
+        if(getCustomer(customer.getId()) == null) customers.add(customer);
+        else throw new ExistCustomerException("with this id = " + customer.getId() + " in CreateCustomer command");
     }
 
     /**
@@ -67,7 +71,7 @@ public class CustomerDB {
      * @throws CustomerNotFoundException if customer not found
      * @see CustomerNotFoundException
      */
-    public void deleteCustomer(int id) throws CustomerNotFoundException{
+    public synchronized void deleteCustomer(int id) throws CustomerNotFoundException{
         for(int i = 0; i < customers.size(); i++){
             if(customers.get(i).getId() == id) {
                 customers.remove(i);

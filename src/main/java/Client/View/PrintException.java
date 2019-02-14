@@ -1,4 +1,4 @@
-package CommonPacage.View;
+package Client.View;
 
 public class PrintException {
     /**
@@ -6,7 +6,7 @@ public class PrintException {
      * @param error type of Exception
      */
     public void print(String error){
-        System.out.println(error);
+        System.err.println(error);
         System.out.println("Write 'help' to see command mnemonic");
     }
 }

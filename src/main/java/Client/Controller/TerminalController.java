@@ -1,7 +1,7 @@
 package Client.Controller;
 
 import Client.Controller.Command.Command;
-import CommonPacage.View.PrintException;
+import Client.View.PrintException;
 import CommonPacage.Controller.Exceptions.WrongCommandException;
 
 import java.io.IOException;

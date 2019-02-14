@@ -24,52 +24,68 @@ public class TerminalController implements Runnable{
     }
 
     /**
-     * This method read string from client's request,
-     * interprets command name from data, create Command by commandName,
-     * interprets parameters with their arguments from data and sends their to execute() method of command
-     * Finally if there are errors, writes reasons for client's response
+     * This method read string from client's request and start commandExecution()
+     * @see TerminalController#commandExecution(String, ObjectOutput)
      */
     @Override
     public void run() {
         try(ObjectOutput response = new ObjectOutputStream(client.getOutputStream());
             ObjectInput request = new ObjectInputStream(client.getInputStream())){
 
-            while(!client.isClosed()){
-                String data;
-                try{
-                    data = request.readUTF();
-                }
-                catch (SocketException se){
-                    data = "exit";
-                }
-
-                if(!data.equals("exit")){
-
-                    try{
-                        String commandName = interpreter.getCommandName(data);
-                        Command command = resolver.resolveCommand(commandName);
-                        command.execute(interpreter.interpretArguments(data), response);
-                        System.out.println("Command "+ data + " complete");
-                    }
-                    catch (IOException e){
-                        throw new IOException();
-                    }
-                    catch (Exception e){
-                        response.writeUTF("FAIL");
-                        response.writeUTF(e.getMessage());
-                        response.flush();
-                    }
-                }
-                else{
-                    response.close();
-                    request.close();
-                    client.close();
-                    System.out.println("Client disconnected");
-                }
+            String data = request.readUTF();
+            try{
+                commandExecution(data, response);
+            }
+            catch (IOException e){
+                errorLog(e);
             }
         }
         catch (Exception e){
-            e.printStackTrace();
+            System.err.println("Client disconnected");
+            e.printStackTrace(System.err);
         }
+    }
+
+    /**
+     * This method interprets command name from data, create Command by commandName,
+     * interprets parameters with their arguments from data and sends their to execute() method of command
+     * @param data is request of client
+     * @param response for client
+     * @throws IOException
+     */
+    private void commandExecution(String data, ObjectOutput response) throws IOException{
+        try{
+            String commandName = interpreter.getCommandName(data);
+            Command command = resolver.resolveCommand(commandName);
+            command.execute(interpreter.interpretArguments(data), response);
+            System.out.println("Command "+ commandName + " complete");
+            System.out.println("Client disconnected");
+        }
+        catch (Exception e){
+            writeCauseOfError(e, response);
+        }
+    }
+
+    /**
+     * This method prints stack trace of IOException
+     * @param e is IOException
+     */
+    private void errorLog(IOException e){
+        System.err.println("Error when responding to client");
+        e.printStackTrace(System.err);
+    }
+
+    /**
+     * This method write cause of error to client's response when command is executing
+     * @param e is Exception
+     * @param response for client
+     * @throws IOException
+     */
+    private void writeCauseOfError(Exception e, ObjectOutput response) throws IOException{
+        response.writeUTF("FAIL");
+        response.writeUTF(e.getMessage());
+        response.flush();
+        System.err.println("The command failed");
+        e.printStackTrace(System.err);
     }
 }

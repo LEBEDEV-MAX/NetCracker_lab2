@@ -1,8 +1,8 @@
 package Client.Controller;
 
 import Client.Controller.Command.*;
-import CommonPacage.View.PrintException;
-import CommonPacage.View.PrintMainMenu;
+import Client.View.PrintException;
+import Client.View.PrintMainMenu;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;

@@ -1,4 +1,4 @@
-package CommonPacage.View;
+package Client.View;
 
 public class PrintMainMenu {
     /**

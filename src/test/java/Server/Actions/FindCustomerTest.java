@@ -32,7 +32,7 @@ public class FindCustomerTest {
     private FindCustomer fc;
 
     @Before
-    public void beforeTest(){
+    public void beforeTest() throws Exception{
         db = new CustomerDB();
         customer = new Customer(1, "Igor", "+09876543210", "USA");
         db.addCustomer(customer);

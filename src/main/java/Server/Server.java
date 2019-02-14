@@ -49,9 +49,9 @@ public class Server {
                 String data = in.nextLine();
                 if(data.equals("exit")){
                     /**
-                     * @see ClientHandler#closeClients() 
+                     * @see ClientHandler#closeHandlers()
                      */
-                    clientHandler.closeClients();
+                    clientHandler.closeHandlers();
                     serverSocket.close();
                 }
                 else{

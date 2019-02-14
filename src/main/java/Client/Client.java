@@ -2,7 +2,7 @@ package Client;
 
 import Client.Controller.Configuration;
 import Client.Controller.TerminalController;
-import CommonPacage.View.PrintMainMenu;
+import Client.View.PrintMainMenu;
 
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -16,6 +16,7 @@ import java.util.Scanner;
 public class Client {
     private final int SERVER_PORT;
     private final String HOST;
+    private boolean closeProgram;
     /**
      * @see Configuration
      */
@@ -35,6 +36,7 @@ public class Client {
         config = new Configuration();
         tc = config.createTC();
         menu = config.createMainMenu();
+        closeProgram = false;
     }
 
     /**
@@ -42,8 +44,30 @@ public class Client {
      * When client got response from server, sends data to Terminal
      */
     public void start(){
+        Scanner in = config.createScanner();
+        menu.printMenu();
+        while (!closeProgram){
+            String data = in.nextLine();
+
+            switch (data){
+                case "exit":
+                    closeProgram = true;
+                    break;
+                case "help":
+                    menu.printCustomerCommandList();
+                    break;
+                default:
+                    socketHandler(data);
+            }
+        }
+    }
+
+    /**
+     * This method create socket and handles requests and responses
+     * @param data is request
+     */
+    private void socketHandler(String data){
         try(Socket socket = new Socket(HOST, SERVER_PORT);
-            Scanner in = config.createScanner();
             /**
              * @see Configuration#createOOS(Socket)
              */
@@ -53,33 +77,16 @@ public class Client {
              */
             ObjectInput response = config.createOIS(socket)){
 
-            menu.printMenu();
-            while(!socket.isClosed()){
-                String data = in.nextLine();
-
-                if(data.equals("exit")) {
-                    request.writeUTF(data);
-                    request.flush();
-                    Thread.sleep(1000);
-                    socket.shutdownInput();
-                    socket.shutdownOutput();
-                    socket.close();
-                }
-                else if(data.equals("help")){
-                    menu.printCustomerCommandList();
-                }
-                else{
-                    request.writeUTF(data);
-                    request.flush();
-                    tc.start(response);
-                }
-            }
+            request.writeUTF(data);
+            request.flush();
+            tc.start(response);
         }
         catch (SocketException se){
-            System.out.println("Server is closed");
+            System.err.println("Server is closed");
         }
         catch (Exception e){
-            e.printStackTrace();
+            e.printStackTrace(System.err);
         }
     }
 }
+

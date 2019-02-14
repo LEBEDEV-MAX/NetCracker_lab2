@@ -23,14 +23,14 @@ public class ClientHandler implements Runnable {
      * @see CustomerDB
      */
     private CustomerDB db;
-    private List<Socket> clients;
+    private List<Thread> terminalThreads;
     private boolean serverIsClosing;
 
     public ClientHandler(ServerSocket serverSocket, Configuration config, CustomerDB db){
         this.serverSocket = serverSocket;
         this.config = config;
         this.db = db;
-        clients = new ArrayList<>();
+        terminalThreads = new ArrayList<>();
         serverIsClosing = false;
     }
 
@@ -40,35 +40,44 @@ public class ClientHandler implements Runnable {
     @Override
     public void run() {
         try{
-            while (!serverIsClosing){
+            while (true){
                 System.out.println("Waiting for connection...");
                 Socket client = serverSocket.accept();
-                clients.add(client);
-                System.out.println("Client connected...");
-                /**
-                 * @see TerminalController
-                 */
-                TerminalController tc = config.createTerminal(client, db);
-                Thread newThread = new Thread(tc);
-                newThread.start();
+
+                if(!serverIsClosing){
+                    System.out.println("Client connected...");
+                    /**
+                     * @see TerminalController
+                     */
+                    TerminalController tc = config.createTerminal(client, db);
+                    Thread newThread = new Thread(tc);
+                    newThread.start();
+                    terminalThreads.add(newThread);
+                }
+                else{
+                    client.close();
+                }
             }
         }
         catch (SocketException se){
-            System.out.println("Server is closed");
+            System.err.println("Server is closed");
+            //se.printStackTrace(System.err);
         }
         catch (Exception e){
-            e.printStackTrace();
+            System.err.println("Error of connection");
+            e.printStackTrace(System.err);
         }
     }
 
     /**
-     * This method close all clients
-     * @throws Exception
+     * This method close new handler for clients
+     * @throws InterruptedException
      */
-    public void closeClients() throws Exception{
+    public void closeHandlers() throws InterruptedException{
         serverIsClosing = true;
-        for(Socket client : clients){
-            client.close();
+        System.out.println("Waiting for handler completion...");
+        for(Thread thread : terminalThreads){
+            if(thread.isAlive()) thread.join();
         }
     }
 }

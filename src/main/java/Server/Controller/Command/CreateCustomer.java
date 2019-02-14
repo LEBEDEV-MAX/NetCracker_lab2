@@ -62,16 +62,6 @@ public class CreateCustomer implements Command {
             throw new WrongParameterException("parameter '" + parameterName + "' not found in CreateCustomer command");
     }
 
-    /**
-     * This method check exist customer in DB or not
-     * @param id of customer
-     * @return true - if customer is not exist; false - if is already exist
-     * @see CustomerDB#getCustomer(int)
-     */
-    private boolean checkExistCustomerByID(int id){
-        if (db.getCustomer(id) == null) return true;
-        else return false;
-    }
 
     /**
      * This method handles client's request
@@ -96,8 +86,10 @@ public class CreateCustomer implements Command {
                 getStringArgument(map,"address")
         );
 
-        if(checkExistCustomerByID(customer.getId())) db.addCustomer(customer);
-        else throw new ExistCustomerException("with this id = " + customer.getId() + " in CreateCustomer command");
+        /**
+         * @see CustomerDB#addCustomer(Customer)
+         */
+        db.addCustomer(customer);
 
         response.writeUTF("SUCCESS");
         response.writeUTF("CreateCustomer");
